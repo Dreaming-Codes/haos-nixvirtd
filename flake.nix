@@ -50,7 +50,7 @@
       inherit (lib) mkIf mkOption mkEnableOption types;
       cfg = config.virtualisation.home-assistant-vm;
     in {
-      imports = [nixvirt.nixosModules.libvirt];
+      imports = [nixvirt.nixosModules.default];
 
       options.virtualisation.home-assistant-vm = {
         enable = mkEnableOption "Home Assistant OS VM";
