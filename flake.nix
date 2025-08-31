@@ -1,6 +1,15 @@
 {
   description = "Home Assistant OS VM via nixvirt";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.garnix.io"
+    ];
+    extra-trusted-public-keys = [
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixvirt = {
@@ -32,59 +41,59 @@
         unxz -c ${haosXz} > $out
       '';
   in {
-    # Reusable module: imports nixvirt and defines the VM
-    nixosModules.home-assistant-vm = {pkgs, ...}: {
+    nixosModules.home-assistant-vm = {
+      lib,
+      pkgs,
+      config,
+      ...
+    }: let
+      inherit (lib) mkIf mkOption mkEnableOption types;
+      cfg = config.virtualisation.home-assistant-vm;
+    in {
       imports = [nixvirt.nixosModules.libvirt];
 
-      virtualisation.libvirtd = {
-        enable = true;
-        qemu = {
-          package = pkgs.qemu_kvm;
-          ovmf.enable = true;
+      options.virtualisation.home-assistant-vm = {
+        enable = mkEnableOption "Home Assistant OS VM";
+        memoryGiB = mkOption {
+          type = types.ints.positive;
+          default = 8;
+          description = "RAM for the VM in GiB.";
         };
       };
 
-      # Define the VM on qemu:///system
-      virtualisation.libvirt.connections."qemu:///system".domains = [
-        {
-          autostart = true;
+      config = mkIf cfg.enable {
+        virtualisation.libvirtd = {
+          enable = true;
+          qemu = {
+            package = pkgs.qemu_kvm;
+            ovmf.enable = true;
+          };
+        };
 
-          definition =
-            nixvirt.lib.domain.writeXML
-            (nixvirt.lib.domain.templates.linux {
-              name = "Home-Assistant";
-              uuid = "cc7439ed-36af-4696-a6f2-1f0c4474d87e";
-              memory = {
-                count = 8;
-                unit = "GiB";
-              };
-              # You can add `vcpu = 2;` if you want more/less CPUs
-              uefi = true;
-
-              # Create an overlay in the default pool backed by the HAOS base image
-              storage_vol = {
-                pool = "default";
-                volume = "Home-Assistant.qcow2";
-              };
-              backing_vol = haosBase;
-            });
-        }
-      ];
+        virtualisation.libvirt.connections."qemu:///system".domains = [
+          {
+            autostart = true;
+            definition =
+              nixvirt.lib.domain.writeXML
+              (nixvirt.lib.domain.templates.linux {
+                name = "Home-Assistant";
+                uuid = "cc7439ed-36af-4696-a6f2-1f0c4474d87e";
+                uefi = true;
+                memory = {
+                  count = cfg.memoryGiB;
+                  unit = "GiB";
+                };
+                storage_vol = {
+                  pool = "default";
+                  volume = "Home-Assistant.qcow2";
+                };
+                backing_vol = haosBase;
+              });
+          }
+        ];
+      };
     };
 
-    # Example host config using the module (optional)
-    nixosConfigurations.host = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = {inherit nixvirt;};
-      modules = [
-        self.nixosModules.home-assistant-vm
-        ({...}: {
-          networking.hostName = "host";
-        })
-      ];
-    };
-
-    # Expose decompressed base image (optional)
     packages.${system}.haos-base = haosBase;
   };
 }
