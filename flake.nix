@@ -72,6 +72,11 @@
           default = "Home-Assistant.qcow2";
           description = "Volume to use for storage";
         };
+        network = mkOption {
+          type = types.str;
+          default = "virbr0";
+          description = "Network to use for the vm";
+        };
       };
 
       config = mkIf cfg.enable {
@@ -85,6 +90,7 @@
                   name = "Home-Assistant";
                   uuid = "f753eeab-1317-4812-8a1d-00c479a4c67f";
                   uefi = true;
+                  bridge_name = cfg.network;
                   memory = {
                     count = cfg.memoryGiB;
                     unit = "GiB";
