@@ -66,7 +66,7 @@
               nixvirt.lib.domain.writeXML
               (nixvirt.lib.domain.templates.linux {
                 name = "Home-Assistant";
-                uuid = "cc7439ed-36af-4696-a6f2-1f0c4474d87e";
+                uuid = "f753eeab-1317-4812-8a1d-00c479a4c67f";
                 uefi = true;
                 memory = {
                   count = cfg.memoryGiB;
