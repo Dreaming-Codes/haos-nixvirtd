@@ -57,11 +57,22 @@
           default = 8;
           description = "RAM for the VM in GiB.";
         };
+        storageGiB = mkOption {
+          type = types.ints.positive;
+          default = 64;
+          description = "Storage for the VM in GiB.";
+        };
+        active = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Wether to start the vm";
+        };
       };
 
       config = mkIf cfg.enable {
         virtualisation.libvirt.connections."qemu:///system".domains = [
           {
+            active = cfg.active;
             definition =
               nixvirt.lib.domain.writeXML
               (nixvirt.lib.domain.templates.linux {
@@ -76,7 +87,7 @@
                   pool = "default";
                   volume = "Home-Assistant.qcow2";
                   capacity = {
-                    count = 64;
+                    count = cfg.storageGiB;
                     unit = "GiB";
                   };
                   format = {type = "qcow2";};
