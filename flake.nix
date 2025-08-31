@@ -57,11 +57,6 @@
           default = 8;
           description = "RAM for the VM in GiB.";
         };
-        storageGiB = mkOption {
-          type = types.ints.positive;
-          default = 64;
-          description = "Storage for the VM in GiB.";
-        };
         active = mkOption {
           type = types.bool;
           default = true;
