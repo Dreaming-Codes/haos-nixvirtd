@@ -50,8 +50,6 @@
       inherit (lib) mkIf mkOption mkEnableOption types;
       cfg = config.virtualisation.home-assistant-vm;
     in {
-      imports = [nixvirt.nixosModules.default];
-
       options.virtualisation.home-assistant-vm = {
         enable = mkEnableOption "Home Assistant OS VM";
         memoryGiB = mkOption {
@@ -62,14 +60,6 @@
       };
 
       config = mkIf cfg.enable {
-        virtualisation.libvirtd = {
-          enable = true;
-          qemu = {
-            package = pkgs.qemu_kvm;
-            ovmf.enable = true;
-          };
-        };
-
         virtualisation.libvirt.connections."qemu:///system".domains = [
           {
             autostart = true;
