@@ -75,11 +75,25 @@
                 storage_vol = {
                   pool = "default";
                   volume = "Home-Assistant.qcow2";
+                  capacity = {
+                    count = 64;
+                    unit = "GiB";
+                  };
+                  format = "qcow2";
                 };
                 backing_vol = {
                   path = haosBase;
                   format = "qcow2";
                 };
+                channels = [
+                  {
+                    type = "unix";
+                    target = {
+                      type = "virtio";
+                      name = "org.qemu.guest_agent.0";
+                    };
+                  }
+                ];
               });
           }
         ];
