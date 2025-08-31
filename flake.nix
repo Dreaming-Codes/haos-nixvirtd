@@ -62,7 +62,6 @@
       config = mkIf cfg.enable {
         virtualisation.libvirt.connections."qemu:///system".domains = [
           {
-            autostart = true;
             definition =
               nixvirt.lib.domain.writeXML
               (nixvirt.lib.domain.templates.linux {
