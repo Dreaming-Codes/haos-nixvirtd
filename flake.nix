@@ -70,44 +70,63 @@
       };
 
       config = mkIf cfg.enable {
-        virtualisation.libvirt.connections."qemu:///system".domains = [
-          {
-            active = cfg.active;
-            definition =
-              nixvirt.lib.domain.writeXML
-              (nixvirt.lib.domain.templates.linux {
-                name = "Home-Assistant";
-                uuid = "f753eeab-1317-4812-8a1d-00c479a4c67f";
-                uefi = true;
-                memory = {
-                  count = cfg.memoryGiB;
+        virtualisation.libvirt.connections."qemu:///system" = {
+          volumes = [
+            {
+              definition = nixvirt.lib.volume.writeXML {
+                name = "Home-Assistant.qcow2";
+                capacity = {
+                  count = cfg.storageGiB;
                   unit = "GiB";
                 };
-                storage_vol = {
-                  pool = "default";
-                  volume = "Home-Assistant.qcow2";
-                  capacity = {
-                    count = cfg.storageGiB;
-                    unit = "GiB";
-                  };
-                  format = {type = "qcow2";};
-                };
-                backing_vol = {
+                target = {format = {type = "qcow2";};};
+                backingStore = {
                   path = haosBase;
                   format = {type = "qcow2";};
                 };
-                channels = [
-                  {
-                    type = "unix";
-                    target = {
-                      type = "virtio";
-                      name = "org.qemu.guest_agent.0";
+              };
+              active = true;
+            }
+          ];
+          domains = [
+            {
+              active = cfg.active;
+              definition =
+                nixvirt.lib.domain.writeXML
+                (nixvirt.lib.domain.templates.linux {
+                  name = "Home-Assistant";
+                  uuid = "f753eeab-1317-4812-8a1d-00c479a4c67f";
+                  uefi = true;
+                  memory = {
+                    count = cfg.memoryGiB;
+                    unit = "GiB";
+                  };
+                  storage_vol = {
+                    pool = "default";
+                    volume = "Home-Assistant.qcow2";
+                    capacity = {
+                      count = cfg.storageGiB;
+                      unit = "GiB";
                     };
-                  }
-                ];
-              });
-          }
-        ];
+                    format = {type = "qcow2";};
+                  };
+                  backing_vol = {
+                    path = haosBase;
+                    format = {type = "qcow2";};
+                  };
+                  channels = [
+                    {
+                      type = "unix";
+                      target = {
+                        type = "virtio";
+                        name = "org.qemu.guest_agent.0";
+                      };
+                    }
+                  ];
+                });
+            }
+          ];
+        };
       };
     };
 
