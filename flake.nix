@@ -76,7 +76,10 @@
                   pool = "default";
                   volume = "Home-Assistant.qcow2";
                 };
-                backing_vol = haosBase;
+                backing_vol = {
+                  path = haosBase;
+                  format = "qcow2";
+                };
               });
           }
         ];
