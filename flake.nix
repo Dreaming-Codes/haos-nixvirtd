@@ -79,11 +79,11 @@
                     count = 64;
                     unit = "GiB";
                   };
-                  format = "qcow2";
+                  format = {type = "qcow2";};
                 };
                 backing_vol = {
                   path = haosBase;
-                  format = "qcow2";
+                  format = {type = "qcow2";};
                 };
                 channels = [
                   {
