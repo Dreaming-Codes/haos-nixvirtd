@@ -67,27 +67,20 @@
           default = true;
           description = "Wether to start the vm";
         };
+        pool = mkOption {
+          type = types.str;
+          default = "default";
+          description = "Pool to use for storage";
+        };
+        volume = mkOption {
+          type = types.str;
+          default = "Home-Assistant.qcow2";
+          description = "Volume to use for storage";
+        };
       };
 
       config = mkIf cfg.enable {
         virtualisation.libvirt.connections."qemu:///system" = {
-          volumes = [
-            {
-              definition = nixvirt.lib.volume.writeXML {
-                name = "Home-Assistant.qcow2";
-                capacity = {
-                  count = cfg.storageGiB;
-                  unit = "GiB";
-                };
-                target = {format = {type = "qcow2";};};
-                backingStore = {
-                  path = haosBase;
-                  format = {type = "qcow2";};
-                };
-              };
-              active = true;
-            }
-          ];
           domains = [
             {
               active = cfg.active;
@@ -102,13 +95,8 @@
                     unit = "GiB";
                   };
                   storage_vol = {
-                    pool = "default";
-                    volume = "Home-Assistant.qcow2";
-                    capacity = {
-                      count = cfg.storageGiB;
-                      unit = "GiB";
-                    };
-                    format = {type = "qcow2";};
+                    pool = cfg.pool;
+                    volume = cfg.volume;
                   };
                   backing_vol = {
                     path = haosBase;
